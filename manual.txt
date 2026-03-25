@@ -1,0 +1,33 @@
+SkyWatch-DB v4.2 Technical Manual
+1. Introduction
+SkyWatch-DB is a distributed time-series database designed for high-throughput telemetry. This manual covers the core configuration and troubleshooting procedures for the v4.2 stable release.
+
+2. System Requirements
+Minimum RAM: 8GB (16GB recommended for production).
+Storage: SSD with at least 500MB/s sequential write speed.
+Network: Port 9090 must be open for the internal Gossip Protocol.
+
+3. Initial Configuration
+To initialize the cluster, edit the skywatch.yaml file. The cluster_id must be unique across the data center.
+Parameter: retention_days
+Default: 30
+Description: Determines how long data points are stored before being compacted and deleted.
+
+4. Security Protocols
+Access to the API is governed by JWT tokens.
+Token Expiry: Default is 3600 seconds.
+Encryption: All data at rest is encrypted using AES-256 by default.
+Password Policy: Administrative passwords must be at least 14 characters long and include one non-alphanumeric symbol.
+
+5. Common CLI Commands
+skywatch-cli status: Check the health of all nodes in the cluster.
+skywatch-cli rebalance: Redistribute data shards if a node is running out of disk space.
+skywatch-cli backup --path /mnt/backup: Perform a hot backup of the current state.
+
+6. Troubleshooting Error Codes
+Error E102: "Heartbeat Timeout". This usually indicates a network partition between the leader node and followers. Check firewall rules for Port 9090.
+Error E405: "Storage Pressure". The write-ahead log (WAL) is full. Increase the wal_segment_size in the config or clear disk space.
+Error E501: "Incompatible Schema". Occurs when a client attempts to write a string value to a float-defined metric field.
+
+7. Performance Tuning
+For high-write environments, set max_concurrent_queries to a value equal to (CPU_CORES * 2). Setting this higher may lead to thread starvation and increased latency.
